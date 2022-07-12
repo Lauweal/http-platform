@@ -1,5 +1,11 @@
 import axios from "axios";
+import { isObject } from '@frade-sam/samtools'
 import { HttpClientOption, IHttpPlugin, Instance, Response, Request } from ".";
+
+export const DEFAULT_MESSAGE = '系统异常';
+export const DEFAULT_CODE = 500;
+export const DEFAULT_DATA = null;
+
 
 export class HttpClient {
   private static client: HttpClient;
@@ -42,34 +48,41 @@ export class HttpClient {
       return Promise.reject(err);
     })
     HttpClient.client.client.interceptors.response.use(this.response, (error): any => {
-      if (typeof error === 'string') {
-        return this.response({
-          status: 500,
-          statusText: '500',
-          data: { message: error, data: null },
-          headers: {},
-          config: {},
-        });
-      }
-      const { response = {}, message = '', code, config = {} } = error;
-      console.log('http error: ' + error)
       const _response: Response<any, any> = {
-        status: response.status,
-        statusText: response.status,
+        status: DEFAULT_CODE,
+        statusText: String(DEFAULT_CODE),
         data: {
-          message: response.message,
-          data: null,
-          code: code || response.status,
+          message: DEFAULT_MESSAGE,
+          data: DEFAULT_DATA,
+          code: DEFAULT_CODE,
         },
-        headers: config.headers,
-        config,
+        headers: {},
+        config: {},
       }
-      if (['ERR_NETWORK'].includes(error.code)) {
-        _response.status = 500;
-        _response.statusText = '500';
-        _response.data.message = message || '网络异常';
+
+      if (typeof error === 'string') {
+        _response.data.message = error;
+      }
+      if (isObject(error) && !isNaN(Number(error.code))) {
+        const { response = {}, code, config = {} } = error;
+        _response.status = response.status || DEFAULT_CODE;
+        _response.statusText = response.status || DEFAULT_CODE;
+        _response.data = {
+          message: response.message || DEFAULT_MESSAGE,
+          code: code || response.status,
+          data: DEFAULT_DATA
+        },
+          _response.headers = config.headers;
+        _response.config = config;
+      }
+      if (isObject(error) && !isNaN(Number(error.code))) {
+        const { message = '' } = error;
+        _response.status = DEFAULT_CODE;
+        _response.statusText = String(DEFAULT_CODE);
+        _response.data.message = message || DEFAULT_MESSAGE;
         _response.data.code = _response.status;
       }
+      console.log('http error: ' + error);
       return this.response(_response);
     })
     return HttpClient.client;

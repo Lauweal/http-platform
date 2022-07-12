@@ -1,6 +1,6 @@
 {
   "name": "http-platform",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "build/index.js",
   "scripts": {
@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "axios": "^0.27.2"
+  },
+  "dependencies": {
+    "@frade-sam/samtools": "^1.0.20"
   }
 }

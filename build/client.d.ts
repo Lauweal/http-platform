@@ -1,4 +1,7 @@
 import { HttpClientOption, IHttpPlugin, Request } from ".";
+export declare const DEFAULT_MESSAGE = "\u7CFB\u7EDF\u5F02\u5E38";
+export declare const DEFAULT_CODE = 500;
+export declare const DEFAULT_DATA: null;
 export declare class HttpClient {
     private readonly options;
     private static client;
